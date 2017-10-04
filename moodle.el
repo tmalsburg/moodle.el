@@ -61,8 +61,12 @@
     :init-value nil
     :lighter "moodle-solution"
     :keymap (let ((map (make-sparse-keymap)))
-              (define-key map (kbd "C-c g")   'moodle-google-this-region)
-              (define-key map (kbd "C-c .")   'moodle-google-all-sentences)
+              (define-key map (kbd "C-c C-c")   'moodle-wrap-up)
+              (define-key map (kbd "C-c r")     'moodle-revert-record)
+              (define-key map (kbd "C-c g")     'moodle-google-this-region)
+              (define-key map (kbd "C-c .")     'moodle-google-all-sentences)
+              (define-key map (kbd "<M-left>")  'moodle-save-and-previous-record)
+              (define-key map (kbd "<M-right>") 'moodle-save-and-next-record)
               map))
 
 (defun moodle-google-this-region ()
@@ -128,23 +132,21 @@
     (write-file fname)))
 
 (defun moodle-display-record (line assignment-id)
-  (let ((buffer (get-buffer-create "*moodle-view-record*")))
-    (with-current-buffer buffer
-      (erase-buffer)
-      (let ((url (format "https://moodle2.uni-potsdam.de/mod/assign/view.php?id=%s&action=grader" assignment-id)))
-        (insert (format "Student %d/%d - " (1+ moodle-current-record-index) (1- (length moodle-records))))
-        (insert-text-button
-         url
-         'action (lambda (x) (browse-url (button-get x 'url)))
-         'url url)
-        (insert "\n\n"))
-      (insert
-       (s-format
-        "$1 ($2, $3):\n\nGrade: $5 (out of $6)\n\nFeedback:\n\n$11"
-        'elt
-        line)))
-    (switch-to-buffer buffer))
-  (moodle-display-record-mode))
+  (with-current-buffer (get-buffer-create "*moodle-view-record*")
+    (erase-buffer)
+    (let ((url (format "https://moodle2.uni-potsdam.de/mod/assign/view.php?id=%s&action=grader" assignment-id)))
+      (insert (format "Student %d/%d - " (1+ moodle-current-record-index) (1- (length moodle-records))))
+      (insert-text-button
+       url
+       'action (lambda (x) (browse-url (button-get x 'url)))
+       'url url)
+      (insert "\n\n"))
+    (insert
+     (s-format
+      "$1 ($2, $3):\n\nGrade: $5 (out of $6)\n\nFeedback:\n\n$11"
+      'elt
+      line))
+    (moodle-display-record-mode)))
 
 (defun moodle-html2text ()
   "Replacement for standard html2text using shr."
@@ -158,25 +160,26 @@
      (goto-char (point-min))))
 
 (defun moodle-display-solution (record)
-  (let ((buffer (get-buffer-create "*moodle-view-solution*")))
-    (with-current-buffer buffer
-      (erase-buffer)
-      (insert (nth 9 record))
-      (moodle-html2text))
-    (switch-to-buffer-other-window buffer))
-  (moodle-display-solution-mode))
+  (with-current-buffer (get-buffer-create "*moodle-view-solution*")
+    (erase-buffer)
+    (insert (nth 9 record))
+    (moodle-html2text)
+    (moodle-display-solution-mode)))
 
 (defun moodle-show-record ()
-  (let ((record (nth (1+ moodle-current-record-index) moodle-records)))
+  (let ((record (nth (1+ moodle-current-record-index) moodle-records))
+        (window (selected-window)))
     (moodle-display-record record moodle-assignment-id)
     (moodle-display-solution record)
-    (select-window (get-buffer-window "*moodle-view-record*"))))
+    (select-window window)))
 
 (defun moodle-init-grading (fname)
   (setq moodle-assignment-fname     fname)
   (setq moodle-assignment-id        (car (last (split-string fname "[-.]") 2)))
   (setq moodle-records              (pcsv-parse-file fname))
   (setq moodle-current-record-index 0)
+  (switch-to-buffer (get-buffer-create "*moodle-view-record*"))
+  (switch-to-buffer-other-window (get-buffer-create "*moodle-view-solution*"))
   (moodle-show-record))
 
 ;;;###autoload
