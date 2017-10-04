@@ -1,4 +1,4 @@
-;;; moodle.el --- Tools for working with Moodle
+;;; moodle.el --- Grade Moodle assignments offline
 
 ;; Author: Titus von der Malsburg <malsburg@posteo.de>
 ;; Maintainer: Titus von der Malsburg <malsburg@posteo.de>

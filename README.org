@@ -1,7 +1,5 @@
 
-* Emacs tools for working with Moodle
-
-At this time there is onyl support for grading Moodle assignments offline.
+* Grade Moodle assignments offline in Emacs
 
 ** Installing
 
