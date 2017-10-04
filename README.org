@@ -1,0 +1,28 @@
+
+* Emacs tools for working with Moodle
+
+At this time there is onyl support for grading Moodle assignments offline.
+
+** Installing
+
+Place ~moodle.el~ in your load-path and ~(require 'moodle)~.
+
+** Usage
+
+To grade an assignment, download the corresponding CSV file from Moodle and start grading with ~M-x moodle-grade-assignment~.  There are two windows:  The first can be used to enter grades and feedback.  It also shows some basic student information.  The second window shows the solution entered by the student.  At this time there is only support for solutions entered in plain text, markdown, and HTML (no support for uploaded documents).  If the solution was entered in HTML, Emacs's own render engine will be used for display.  Note, however, that there is currently no support for displaying images uploaded by the student.  If an image was uploaded and references in HTML, am asterisk will be shown instead of the image.
+
+When finished grading, just upload the CSV file back to Moodle to enter the grades and your feedback into the system.
+
+*Disclaimer:* This software is experimental and unfinished.  Use at your own risk.
+
+Key commands in the window showing student info (record view):
+
+- ~M-right~ :: Save grade and feedback and move to the next student.  Wraps around at the end of the list.
+- ~M-left~ :: Save grade and feedback and move to the previous student.  Wraps around at the end of the list.
+- ~C-c r~ :: Revert grade and feedback to whatever it was before the record was displayed.
+- ~C-c C-c~ :: Save and quit.  (Note: Grades and feedback are not saved to disk when moving from one student to the next.)
+
+Key commands in the window showing the solution (solution view):
+
+- ~C-c g~ :: Google marked region with quotes.  Can be used to check for plagiarism.
+- ~C-c .~ :: Google each sentence of the solution.  Caution: If the solution is long, this may open a lot of tabs in your browser and Google may block you temporarily.
